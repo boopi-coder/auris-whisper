@@ -1,10 +1,10 @@
 [package]
 name = "auris-whisper"
-version = "2.2.1"
+version = "2.2.2"
 description = "Offline speech-to-text: drop a file or dictate, get clean text"
 authors = ["boopi.ru"]
 license = "MIT"
-repository = "https://github.com/sibawal/auris-whisper"
+repository = "https://github.com/boopi-coder/auris-whisper"
 edition = "2021"
 rust-version = "1.88"
 default-run = "auris-whisper"

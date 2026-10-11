@@ -12,8 +12,12 @@
 [![Linux](https://img.shields.io/badge/Linux-AppImage%20%7C%20deb-fcc624?logo=linux&logoColor=black)](#скачать)
 [![Лицензия](https://img.shields.io/badge/лицензия-MIT-22c55e)](LICENSE)
 [![Автор](https://img.shields.io/badge/сделано-boopi.ru-7c3aed)](https://boopi.ru)
+[![Boosty](https://img.shields.io/badge/Boosty-boopi__coder-f15f2c?logo=boosty&logoColor=white)](https://boosty.to/boopi_coder)
 
 <img src="docs/screenshot-ru.png" width="720" alt="Окно Auris Whisper">
+
+
+<a href="https://boosty.to/boopi_coder"><img src="docs/boosty-button.png" width="300" alt="Поддержать на Boosty"></a>
 
 </div>
 
@@ -171,7 +175,7 @@ Whisper, приложение предложит их попробовать.
 - **Linux** — `libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libasound2-dev libclang-dev libvulkan-dev` и Vulkan SDK (нужен `glslc`).
 
 ```bash
-git clone https://github.com/sibawal/auris-whisper.git
+git clone https://github.com/boopi-coder/auris-whisper.git
 cd auris-whisper
 npm install
 npm run dev       # запустить в режиме разработки
@@ -223,6 +227,12 @@ cargo run --release --example transcribe -- путь/к/модели.bin зап�
 
 Версия 1.x — нативное приложение на Swift только для macOS — осталась в истории
 git (тег `v1.0.1`).
+
+## Поддержать проект
+
+Auris Whisper бесплатный и с открытым кодом. Если он экономит вам время — поддержите разработку на **[Boosty](https://boosty.to/boopi_coder)**: это помогает развивать текущие проекты и запускать новые.
+
+<a href="https://boosty.to/boopi_coder"><img src="docs/boosty-button.png" width="260" alt="Поддержать на Boosty"></a>
 
 ## Лицензия
 

@@ -12,8 +12,12 @@ No accounts, no uploads. Everything runs on your own computer.
 [![Linux](https://img.shields.io/badge/Linux-AppImage%20%7C%20deb-fcc624?logo=linux&logoColor=black)](#download)
 [![License](https://img.shields.io/badge/license-MIT-22c55e)](LICENSE)
 [![Made by](https://img.shields.io/badge/made%20by-boopi.ru-7c3aed)](https://boopi.ru)
+[![Boosty](https://img.shields.io/badge/Boosty-boopi__coder-f15f2c?logo=boosty&logoColor=white)](https://boosty.to/boopi_coder)
 
 <img src="docs/screenshot-en.png" width="720" alt="Auris Whisper window">
+
+
+<a href="https://boosty.to/boopi_coder"><img src="docs/boosty-button.png" width="300" alt="Support on Boosty"></a>
 
 </div>
 
@@ -171,7 +175,7 @@ You need [Rust](https://rustup.rs), Node.js 18+, CMake and:
 - **Linux** — `libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libasound2-dev libclang-dev libvulkan-dev` and the Vulkan SDK (for `glslc`).
 
 ```bash
-git clone https://github.com/sibawal/auris-whisper.git
+git clone https://github.com/boopi-coder/auris-whisper.git
 cd auris-whisper
 npm install
 npm run dev       # run in development mode
@@ -223,6 +227,12 @@ engine is [whisper.cpp](https://github.com/ggml-org/whisper.cpp).
 
 Version 1.x — the native Swift app for macOS only — lives on in git history
 (tag `v1.0.1`).
+
+## Support the project
+
+Auris Whisper is free and open source. If it saves you time, support development on **[Boosty](https://boosty.to/boopi_coder)** — it funds current projects and helps launch new ones.
+
+<a href="https://boosty.to/boopi_coder"><img src="docs/boosty-button.png" width="260" alt="Support on Boosty"></a>
 
 ## License
 

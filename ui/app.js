@@ -885,7 +885,7 @@ function wire() {
 
   $("aboutBtn").addEventListener("click", openAbout);
   $("aboutClose").addEventListener("click", () => $("aboutDialog").close());
-  $("githubBtn").addEventListener("click", () => invoke("open_url", { url: "https://github.com/sibawal/auris-whisper" }));
+  $("githubBtn").addEventListener("click", () => invoke("open_url", { url: "https://github.com/boopi-coder/auris-whisper" }));
 
   // Горячие клавиши: ⌘/Ctrl + O, R, S
   document.addEventListener("keydown", (e) => {

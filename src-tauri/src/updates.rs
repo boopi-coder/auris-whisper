@@ -12,7 +12,7 @@ use serde::Serialize;
 use tauri::{AppHandle, Emitter, State};
 use tauri_plugin_updater::{Update, UpdaterExt};
 
-pub const RELEASES_PAGE: &str = "https://github.com/sibawal/auris-whisper/releases/latest";
+pub const RELEASES_PAGE: &str = "https://github.com/boopi-coder/auris-whisper/releases/latest";
 
 /// Найденное обновление ждёт, пока пользователь нажмёт «Установить».
 #[derive(Default)]
