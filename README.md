@@ -7,12 +7,12 @@
 **Offline speech-to-text for macOS, Windows and Linux. Drop a file or dictate — get clean `.txt`.**
 No accounts, no uploads. Everything runs on your own computer.
 
-[![macOS](https://img.shields.io/badge/macOS-12%2B-000000?logo=apple&logoColor=white)](#download)
-[![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078d4?logo=windows&logoColor=white)](#download)
-[![Linux](https://img.shields.io/badge/Linux-AppImage%20%7C%20deb-fcc624?logo=linux&logoColor=black)](#download)
-[![License](https://img.shields.io/badge/license-MIT-22c55e)](LICENSE)
-[![Made by](https://img.shields.io/badge/made%20by-boopi.site-7c3aed)](https://boopi.site)
-[![Boosty](https://img.shields.io/badge/Boosty-boopi__coder-f15f2c?logo=boosty&logoColor=white)](https://boosty.to/boopi_coder)
+[![macOS](docs/badges/macos-12-000000-f5bead.svg)](#download)
+[![Windows](docs/badges/windows-10-11-0078d4-93742f.svg)](#download)
+[![Linux](docs/badges/linux-appimage-deb-fcc624-43e72c.svg)](#download)
+[![License](docs/badges/license-mit-22c55e-f2fbda.svg)](LICENSE)
+[![Made by](docs/badges/made-by-boopi-site-7c3aed-8bb6d2.svg)](https://boopi.site)
+[![Boosty](docs/badges/boosty-boopi-coder-f15f2c-268b6c.svg)](https://boosty.to/boopi_coder)
 
 <img src="docs/screenshot-en.png" width="720" alt="Auris Whisper window">
 
