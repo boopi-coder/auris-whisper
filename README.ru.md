@@ -11,7 +11,7 @@
 [![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078d4?logo=windows&logoColor=white)](#скачать)
 [![Linux](https://img.shields.io/badge/Linux-AppImage%20%7C%20deb-fcc624?logo=linux&logoColor=black)](#скачать)
 [![Лицензия](https://img.shields.io/badge/лицензия-MIT-22c55e)](LICENSE)
-[![Автор](https://img.shields.io/badge/сделано-boopi.ru-7c3aed)](https://boopi.ru)
+[![Автор](https://img.shields.io/badge/сделано-boopi.site-7c3aed)](https://boopi.site)
 [![Boosty](https://img.shields.io/badge/Boosty-boopi__coder-f15f2c?logo=boosty&logoColor=white)](https://boosty.to/boopi_coder)
 
 <img src="docs/screenshot-ru.png" width="720" alt="Окно Auris Whisper">
@@ -248,6 +248,6 @@ Tauri (MIT/Apache-2.0), Symphonia (MPL-2.0), libopus (BSD). Полный спи�
 
 <div align="center">
 
-Сделано в [boopi.ru](https://boopi.ru) · [English README](README.md)
+Сделано в [boopi.site](https://boopi.site) · [English README](README.md)
 
 </div>

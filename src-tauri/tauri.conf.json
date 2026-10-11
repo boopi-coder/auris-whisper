@@ -38,9 +38,9 @@
     "resources": {
       "resources/ggml-silero-v5.1.2.bin": "resources/ggml-silero-v5.1.2.bin"
     },
-    "publisher": "boopi.ru",
-    "homepage": "https://boopi.ru",
-    "copyright": "© 2026 boopi.ru — MIT License",
+    "publisher": "boopi.site",
+    "homepage": "https://boopi.site",
+    "copyright": "© 2026 boopi.site — MIT License",
     "license": "MIT",
     "licenseFile": "../LICENSE",
     "category": "Productivity",

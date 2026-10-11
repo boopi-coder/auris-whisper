@@ -11,7 +11,7 @@ No accounts, no uploads. Everything runs on your own computer.
 [![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078d4?logo=windows&logoColor=white)](#download)
 [![Linux](https://img.shields.io/badge/Linux-AppImage%20%7C%20deb-fcc624?logo=linux&logoColor=black)](#download)
 [![License](https://img.shields.io/badge/license-MIT-22c55e)](LICENSE)
-[![Made by](https://img.shields.io/badge/made%20by-boopi.ru-7c3aed)](https://boopi.ru)
+[![Made by](https://img.shields.io/badge/made%20by-boopi.site-7c3aed)](https://boopi.site)
 [![Boosty](https://img.shields.io/badge/Boosty-boopi__coder-f15f2c?logo=boosty&logoColor=white)](https://boosty.to/boopi_coder)
 
 <img src="docs/screenshot-en.png" width="720" alt="Auris Whisper window">
@@ -248,6 +248,6 @@ Tauri (MIT/Apache-2.0), Symphonia (MPL-2.0) and libopus (BSD). Full list in
 
 <div align="center">
 
-Made by [boopi.ru](https://boopi.ru) · [Русская версия README](README.ru.md)
+Made by [boopi.site](https://boopi.site) · [Русская версия README](README.ru.md)
 
 </div>

@@ -2,7 +2,7 @@
 name = "auris-whisper"
 version = "2.2.3"
 description = "Offline speech-to-text: drop a file or dictate, get clean text"
-authors = ["boopi.ru"]
+authors = ["boopi.site"]
 license = "MIT"
 repository = "https://github.com/boopi-coder/auris-whisper"
 edition = "2021"
