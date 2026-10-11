@@ -124,6 +124,8 @@ const STRINGS = {
     // О программе
     aboutVersion: (v, w) => `Версия ${v} · whisper.cpp ${w}`,
     aboutText: "Офлайн-расшифровка речи. Ничего не уходит в сеть — всё считается на вашем компьютере. Разработчик: boopi.ru. Открытая лицензия MIT.",
+    supportBoosty: "Поддержать автора",
+    supportBoostyHint: "Открыть страницу автора на Boosty",
     aboutCredits: "Внутри: whisper.cpp и ggml (MIT), модели Whisper от OpenAI (MIT), Silero VAD (MIT), Tauri (MIT/Apache-2.0), Symphonia (MPL-2.0), libopus (BSD).",
   },
   en: {
@@ -245,6 +247,8 @@ const STRINGS = {
     useGpuNone: "GPU acceleration (none found)",
     aboutVersion: (v, w) => `Version ${v} · whisper.cpp ${w}`,
     aboutText: "Offline speech transcription. Nothing leaves your computer — everything runs locally. Developer: boopi.ru. Open MIT license.",
+    supportBoosty: "Support the author",
+    supportBoostyHint: "Open the author's page on Boosty",
     aboutCredits: "Built on whisper.cpp and ggml (MIT), Whisper models by OpenAI (MIT), Silero VAD (MIT), Tauri (MIT/Apache-2.0), Symphonia (MPL-2.0), libopus (BSD).",
   },
 };

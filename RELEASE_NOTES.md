@@ -1,11 +1,9 @@
-## Что нового в 2.2.2
+## Что нового в 2.2.3
 
-- Проект переехал на **github.com/boopi-coder/auris-whisper** — обновления теперь приходят с нового адреса. Старые ссылки перенаправляются автоматически.
-- Появилась возможность поддержать разработку на **[Boosty](https://boosty.to/boopi_coder)** — это помогает развивать Auris Whisper и запускать новые проекты.
+- В окне **«О программе»** появилась кнопка **«Поддержать автора»** — она открывает страницу автора на **[Boosty](https://boosty.to/boopi_coder)**. Спасибо всем, кто помогает развивать Auris Whisper!
 
 ---
 
-## What's new in 2.2.2
+## What's new in 2.2.3
 
-- The project moved to **github.com/boopi-coder/auris-whisper** — updates now come from the new address. Old links redirect automatically.
-- You can now support development on **[Boosty](https://boosty.to/boopi_coder)** — it helps improve Auris Whisper and launch new projects.
+- The **About** window now has a **"Support the author"** button that opens the author's page on **[Boosty](https://boosty.to/boopi_coder)**. Thank you to everyone who helps Auris Whisper grow!
