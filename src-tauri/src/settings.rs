@@ -27,11 +27,15 @@ pub struct Settings {
     pub check_updates: bool,
     /// Пользователь закрыл подсказку про русские модели.
     pub ru_tip_hidden: bool,
+    /// Голосовой ввод в любую программу по горячей клавише; приложение живёт в трее.
+    pub voice_input: bool,
+    /// Горячая клавиша голосового ввода («Alt+Space», «Control+Alt+KeyD»…).
+    pub hotkey: String,
 }
 
 impl Default for Settings {
     fn default() -> Self {
-        Self { ui_lang: None, language: "auto".into(), timestamps: false, auto_save: true, model: None, use_gpu: true, mic: None, diarize: false, speakers: None, check_updates: true, ru_tip_hidden: false }
+        Self { ui_lang: None, language: "auto".into(), timestamps: false, auto_save: true, model: None, use_gpu: true, mic: None, diarize: false, speakers: None, check_updates: true, ru_tip_hidden: false, voice_input: true, hotkey: crate::background::default_hotkey() }
     }
 }
 

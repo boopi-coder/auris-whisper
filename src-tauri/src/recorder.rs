@@ -25,6 +25,8 @@ const SILENCE_AFTER: Duration = Duration::from_millis(1500);
 pub struct Recording {
     stop_tx: mpsc::Sender<()>,
     worker: Option<JoinHandle<Result<Vec<f32>, String>>>,
+    /// Уже записанное (16 кГц моно) — для расшифровки на лету.
+    audio: Arc<Mutex<Vec<f32>>>,
 }
 
 pub struct Level {
@@ -66,20 +68,38 @@ impl Recording {
     pub fn start(device_id: Option<String>, on_level: impl Fn(Level) + Send + 'static) -> Result<Self, String> {
         let (stop_tx, stop_rx) = mpsc::channel::<()>();
         let (ready_tx, ready_rx) = mpsc::channel::<Result<(), String>>();
+        let audio = Arc::new(Mutex::new(Vec::with_capacity(SAMPLE_RATE as usize * 60)));
 
+        let shared = audio.clone();
         let worker = std::thread::Builder::new()
             .name("recorder".into())
-            .spawn(move || run(device_id, stop_rx, ready_tx, on_level))
+            .spawn(move || run(device_id, stop_rx, ready_tx, shared, on_level))
             .map_err(|e| e.to_string())?;
 
         match ready_rx.recv_timeout(Duration::from_secs(10)) {
-            Ok(Ok(())) => Ok(Self { stop_tx, worker: Some(worker) }),
+            Ok(Ok(())) => Ok(Self { stop_tx, worker: Some(worker), audio }),
             Ok(Err(e)) => {
                 let _ = worker.join();
                 Err(e)
             }
             Err(_) => Err(tr("Микрофон не отвечает.", "The microphone does not respond.")),
         }
+    }
+
+    /// Сколько отсчётов уже записано.
+    pub fn len(&self) -> usize {
+        self.audio.lock().unwrap().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Копия записанного с отсчёта `from` до `to`.
+    pub fn slice(&self, from: usize, to: usize) -> Vec<f32> {
+        let a = self.audio.lock().unwrap();
+        let to = to.min(a.len());
+        a[from.min(to)..to].to_vec()
     }
 
     /// Останавливает запись и отдаёт всё записанное (16 кГц моно).
@@ -131,6 +151,7 @@ fn run(
     device_id: Option<String>,
     stop_rx: mpsc::Receiver<()>,
     ready_tx: mpsc::Sender<Result<(), String>>,
+    audio: Arc<Mutex<Vec<f32>>>,
     on_level: impl Fn(Level),
 ) -> Result<Vec<f32>, String> {
     let fail = |msg: String| {
@@ -186,7 +207,7 @@ fn run(
 
     let started = Instant::now();
     let mut resampler = StreamResampler::new(rate)?;
-    let mut out: Vec<f32> = Vec::with_capacity(SAMPLE_RATE as usize * 60);
+    let mut fresh: Vec<f32> = Vec::new();
     let mut pending = Vec::new();
 
     loop {
@@ -203,13 +224,15 @@ fn run(
         if !pending.is_empty() {
             let sum: f32 = pending.iter().map(|v| v * v).sum();
             rms = (sum / pending.len() as f32).sqrt();
-            resampler.push(&pending, &mut out);
+            resampler.push(&pending, &mut fresh);
             pending.clear();
+            audio.lock().unwrap().append(&mut fresh);
         }
+        let recorded = audio.lock().unwrap().len();
         let loudest = f32::from_bits(peak.load(Ordering::Relaxed));
         on_level(Level {
             level: (rms * 12.0).min(1.0),
-            seconds: out.len() as f64 / SAMPLE_RATE as f64,
+            seconds: recorded as f64 / SAMPLE_RATE as f64,
             silent: started.elapsed() >= SILENCE_AFTER && loudest < SILENCE_PEAK,
         });
 
@@ -218,6 +241,7 @@ fn run(
         }
     }
     drop(stream);
+    let mut out = std::mem::take(&mut *audio.lock().unwrap());
     out.extend(resampler.finish());
 
     if let Some(e) = failed.lock().unwrap().take() {

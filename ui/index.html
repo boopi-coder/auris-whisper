@@ -46,6 +46,11 @@
         <svg class="ico caret" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
       </button>
 
+      <button class="chip" id="voiceChip" type="button" data-t-title="voiceTitle">
+        <svg class="ico" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 15h10"/></svg>
+        <span id="voiceChipText"></span>
+      </button>
+
       <div class="spacer"></div>
 
       <label class="check" data-t-title="timestampsHint">
@@ -212,6 +217,34 @@
         </button>
         <button class="btn primary" id="aboutClose" type="button">OK</button>
       </div>
+    </div>
+  </dialog>
+
+  <!-- Голосовой ввод в любую программу -->
+  <dialog class="sheet small" id="voiceDialog">
+    <div class="sheet-head">
+      <div>
+        <h2 tabindex="-1" autofocus data-t="voiceTitle">Голосовой ввод</h2>
+        <p class="muted" data-t="voiceIntro"></p>
+      </div>
+      <button class="icon-btn" id="voiceClose" type="button" aria-label="×">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="voice">
+      <label class="check"><input type="checkbox" id="voiceEnabled"><span data-t="voiceEnabled"></span></label>
+      <div class="voice-row">
+        <span data-t="voiceHotkey"></span>
+        <button class="btn hotkey" id="hotkeyBtn" type="button"></button>
+        <button class="link" id="hotkeyReset" type="button" data-t="voiceHotkeyReset"></button>
+      </div>
+      <label class="check"><input type="checkbox" id="voiceAutostart"><span data-t="voiceAutostart"></span></label>
+      <div class="voice-access" id="voiceAccess" hidden>
+        <span data-t="voiceAccessText"></span>
+        <button class="btn small primary" id="voiceAccessBtn" type="button" data-t="voiceAccessBtn"></button>
+      </div>
+      <p class="model-error" id="voiceError" hidden></p>
+      <p class="muted small-text" id="voiceModelHint"></p>
     </div>
   </dialog>
 

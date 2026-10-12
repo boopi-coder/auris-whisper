@@ -12,3 +12,7 @@ pub fn set_english(english: bool) {
 pub fn tr(ru: &str, en: &str) -> String {
     if ENGLISH.load(Ordering::Relaxed) { en } else { ru }.to_string()
 }
+
+pub fn is_english() -> bool {
+    ENGLISH.load(Ordering::Relaxed)
+}

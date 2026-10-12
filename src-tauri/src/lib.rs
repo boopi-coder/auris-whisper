@@ -9,10 +9,13 @@
 //!   open-files        — файлы, открытые через «Открыть с помощью» / двойной клик
 
 pub mod audio;
+mod background;
 mod cluster;
 pub mod diarize;
+pub mod dictation;
 pub mod engine;
 pub mod i18n;
+mod insert;
 pub mod models;
 pub mod monitor;
 mod native_decode;
@@ -48,6 +51,8 @@ struct AppState {
     cancel: Arc<AtomicBool>,
     busy: Arc<AtomicBool>,
     recording: Mutex<Option<recorder::Recording>>,
+    /// Голосовой ввод по горячей клавише (в любую программу).
+    dictation: Mutex<Option<dictation::Session>>,
     downloads: Arc<models::Downloads>,
     pending_open: Mutex<Vec<String>>,
     ui_ready: AtomicBool,
@@ -148,10 +153,17 @@ fn bootstrap(state: State<'_, AppState>) -> Bootstrap {
 }
 
 #[tauri::command]
-fn save_settings(state: State<'_, AppState>, settings: Settings) {
+fn save_settings(app: AppHandle, state: State<'_, AppState>, mut settings: Settings) {
+    {
+        let cur = state.settings.lock().unwrap();
+        settings.voice_input = cur.voice_input;
+        settings.hotkey = cur.hotkey.clone();
+    }
     i18n::set_english(settings.english());
     settings.save(&state.settings_path);
     *state.settings.lock().unwrap() = settings;
+    // Язык интерфейса мог смениться — подписи в трее тоже.
+    background::refresh_tray(&app);
 }
 
 #[derive(Clone, Serialize)]
@@ -413,6 +425,70 @@ fn stop_recording(app: AppHandle, state: State<'_, AppState>, base_name: String)
     start_job(app, &state, vec![Source::Recording(samples, base_name)])
 }
 
+// MARK: - Голосовой ввод
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct VoiceStatus {
+    enabled: bool,
+    hotkey: String,
+    hotkey_label: String,
+    autostart: bool,
+    /// macOS: разрешено ли нажимать «Вставить» за пользователя.
+    can_paste: bool,
+}
+
+fn voice_status_of(app: &AppHandle) -> VoiceStatus {
+    let s = app.state::<AppState>().settings.lock().unwrap().clone();
+    VoiceStatus {
+        enabled: s.voice_input,
+        hotkey_label: background::pretty(&s.hotkey),
+        hotkey: s.hotkey,
+        autostart: background::autostart_enabled(app),
+        can_paste: insert::can_send_keys(),
+    }
+}
+
+#[tauri::command]
+fn voice_status(app: AppHandle) -> VoiceStatus {
+    voice_status_of(&app)
+}
+
+/// Включить/выключить голосовой ввод, сменить клавишу, автозапуск.
+#[tauri::command]
+fn set_voice_input(app: AppHandle, enabled: bool, hotkey: String, autostart: bool) -> Result<VoiceStatus, String> {
+    let state = app.state::<AppState>();
+    let old = state.settings.lock().unwrap().clone();
+    if let Err(e) = background::apply_hotkey(&app, enabled, &hotkey) {
+        let _ = background::apply_hotkey(&app, old.voice_input, &old.hotkey);
+        return Err(e);
+    }
+    background::set_autostart(&app, autostart)?;
+    {
+        let mut s = state.settings.lock().unwrap();
+        s.voice_input = enabled;
+        s.hotkey = hotkey;
+        s.save(&state.settings_path);
+    }
+    background::refresh_tray(&app);
+    Ok(voice_status_of(&app))
+}
+
+#[tauri::command]
+fn toggle_dictation(app: AppHandle) {
+    dictation::toggle(&app);
+}
+
+/// macOS: системный запрос на «Универсальный доступ» и сами настройки.
+#[tauri::command]
+fn request_accessibility() -> Result<bool, String> {
+    if insert::request_access() {
+        return Ok(true);
+    }
+    insert::open_access_settings()?;
+    Ok(false)
+}
+
 // MARK: - Очередь расшифровки
 
 fn start_job(app: AppHandle, state: &AppState, sources: Vec<Source>) -> Result<(), String> {
@@ -610,10 +686,7 @@ fn open_paths(app: &AppHandle, paths: Vec<String>) {
     } else {
         pending.extend(paths);
     }
-    if let Some(w) = app.get_webview_window("main") {
-        let _ = w.unminimize();
-        let _ = w.set_focus();
-    }
+    background::show_main(app);
 }
 
 /// Аргументы командной строки, похожие на файлы (Windows/Linux «Открыть с помощью»).
@@ -629,8 +702,26 @@ pub fn run() {
 
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
-            open_paths(app, file_args(argv));
+            let files = file_args(argv);
+            if files.is_empty() {
+                // Запустили второй раз — показать уже работающее (оно могло быть в трее).
+                background::show_main(app);
+            }
+            open_paths(app, files);
         }))
+        .plugin(
+            tauri_plugin_global_shortcut::Builder::new()
+                .with_handler(|app, _shortcut, event| {
+                    if event.state() == tauri_plugin_global_shortcut::ShortcutState::Pressed {
+                        dictation::toggle(app);
+                    }
+                })
+                .build(),
+        )
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            Some(vec![background::BACKGROUND_ARG]),
+        ))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_clipboard_manager::init())
@@ -677,6 +768,7 @@ pub fn run() {
                 cancel,
                 busy: Arc::new(AtomicBool::new(false)),
                 recording: Mutex::new(None),
+                dictation: Mutex::new(None),
                 downloads: Arc::new(models::Downloads::default()),
                 pending_open: Mutex::new({
                     let mut files = file_args(std::env::args());
@@ -686,6 +778,26 @@ pub fn run() {
                 ui_ready: AtomicBool::new(false),
                 system,
             });
+
+            // Голосовой ввод: индикатор, трей, горячая клавиша.
+            let handle = app.handle().clone();
+            // Без трея (Linux без панели) или индикатора приложение всё равно работает.
+            if let Err(e) = dictation::create_overlay(&handle) {
+                eprintln!("overlay: {e}");
+            }
+            if let Err(e) = background::create_tray(&handle) {
+                eprintln!("tray: {e}");
+            }
+            {
+                let s = handle.state::<AppState>().settings.lock().unwrap().clone();
+                if let Err(e) = background::apply_hotkey(&handle, s.voice_input, &s.hotkey) {
+                    eprintln!("hotkey: {e}");
+                }
+            }
+            // При входе в систему — сразу в трей, без окна.
+            if !std::env::args().any(|a| a == background::BACKGROUND_ARG) {
+                background::show_main(&handle);
+            }
 
             // Полоса нагрузки: раз в секунду
             let handle = app.handle().clone();
@@ -719,6 +831,10 @@ pub fn run() {
             list_mics,
             open_mic_settings,
             download_diarization,
+            voice_status,
+            set_voice_input,
+            toggle_dictation,
+            request_accessibility,
             updates::check_update,
             updates::install_update,
         ])
@@ -726,6 +842,23 @@ pub fn run() {
         .expect("error while building Auris Whisper");
 
     app.run(|_app, _event| {
+        match &_event {
+            // Пока включён голосовой ввод, крестик прячет окно в трей.
+            tauri::RunEvent::WindowEvent { label, event: tauri::WindowEvent::CloseRequested { api, .. }, .. }
+                if label == "main" =>
+            {
+                if _app.state::<AppState>().settings.lock().unwrap().voice_input {
+                    api.prevent_close();
+                    if let Some(w) = _app.get_webview_window("main") {
+                        let _ = w.hide();
+                    }
+                }
+            }
+            // macOS: щелчок по значку в Dock, когда окно спрятано.
+            #[cfg(target_os = "macos")]
+            tauri::RunEvent::Reopen { .. } => background::show_main(_app),
+            _ => {}
+        }
         // macOS: файлы, брошенные на иконку или открытые через Finder.
         #[cfg(target_os = "macos")]
         if let tauri::RunEvent::Opened { urls } = _event {

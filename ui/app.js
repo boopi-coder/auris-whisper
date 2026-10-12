@@ -113,6 +113,7 @@ function applyStrings() {
   renderDiarize();
   renderUpdate();
   renderRuTip();
+  renderVoice();
 }
 
 // С русской моделью язык один — показываем его и не даём менять.
@@ -825,6 +826,65 @@ function openAbout() {
   $("aboutDialog").showModal();
 }
 
+// ---------- Голосовой ввод ----------
+
+let voice = null;          // {enabled, hotkey, hotkeyLabel, autostart, canPaste}
+let capturingHotkey = false;
+
+async function refreshVoice() {
+  try { voice = await invoke("voice_status"); } catch { return; }
+  renderVoice();
+}
+
+function renderVoice() {
+  if (!voice) return;
+  $("voiceChipText").textContent = voice.enabled ? voice.hotkeyLabel : t("voiceOff");
+  $("voiceChip").classList.toggle("off", !voice.enabled);
+  $("voiceEnabled").checked = voice.enabled;
+  $("voiceAutostart").checked = voice.autostart;
+  $("hotkeyBtn").textContent = capturingHotkey ? t("voicePress") : voice.hotkeyLabel;
+  $("hotkeyBtn").classList.toggle("recording", capturingHotkey);
+  $("hotkeyBtn").disabled = !voice.enabled;
+  $("voiceAccess").hidden = !IS_MAC || voice.canPaste || !voice.enabled;
+  $("voiceModelHint").textContent = t("voiceModelHint");
+}
+
+async function applyVoice(patch) {
+  const next = { enabled: voice.enabled, hotkey: voice.hotkey, autostart: voice.autostart, ...patch };
+  try {
+    voice = await invoke("set_voice_input", next);
+    $("voiceError").hidden = true;
+  } catch (e) {
+    $("voiceError").textContent = String(e);
+    $("voiceError").hidden = false;
+  }
+  renderVoice();
+}
+
+function openVoice() {
+  $("voiceError").hidden = true;
+  refreshVoice();
+  $("voiceDialog").showModal();
+}
+
+/// Запись сочетания: следующее нажатие с модификатором (или F1–F24) — новая клавиша.
+function onHotkeyKeydown(e) {
+  if (!capturingHotkey) return;
+  e.preventDefault();
+  e.stopPropagation();
+  if (["Control", "Alt", "Shift", "Meta", "OS", "AltGraph"].includes(e.key)) return;
+  if (e.code === "Escape") { capturingHotkey = false; renderVoice(); return; }
+  const mods = [e.ctrlKey && "Control", e.altKey && "Alt", e.shiftKey && "Shift", e.metaKey && "Super"].filter(Boolean);
+  const fkey = /^F([1-9]|1[0-9]|2[0-4])$/.test(e.code);
+  if (!mods.length && !fkey) {
+    $("voiceError").textContent = t("voiceNeedModifier");
+    $("voiceError").hidden = false;
+    return;
+  }
+  capturingHotkey = false;
+  applyVoice({ hotkey: [...mods, e.code].join("+") });
+}
+
 // ---------- Подключение ----------
 
 function wire() {
@@ -843,6 +903,20 @@ function wire() {
   }));
 
   $("modelChip").addEventListener("click", openModels);
+  $("voiceChip").addEventListener("click", openVoice);
+  $("voiceClose").addEventListener("click", () => { capturingHotkey = false; $("voiceDialog").close(); });
+  $("voiceDialog").addEventListener("close", () => { capturingHotkey = false; });
+  $("voiceEnabled").addEventListener("change", (e) => applyVoice({ enabled: e.target.checked }));
+  $("voiceAutostart").addEventListener("change", (e) => applyVoice({ autostart: e.target.checked }));
+  $("hotkeyBtn").addEventListener("click", () => { capturingHotkey = true; $("voiceError").hidden = true; renderVoice(); });
+  $("hotkeyReset").addEventListener("click", () => applyVoice({ hotkey: IS_MAC ? "Alt+Space" : "Control+Alt+Space" }));
+  $("voiceAccessBtn").addEventListener("click", async () => {
+    try { await invoke("request_accessibility"); } catch (e) { showError(String(e)); }
+    setTimeout(refreshVoice, 1500);
+  });
+  window.addEventListener("keydown", onHotkeyKeydown, true);
+  // Вернулись из системных настроек — разрешение могло появиться.
+  window.addEventListener("focus", () => { if (voice?.enabled && IS_MAC && !voice.canPaste) refreshVoice(); });
   $("engineInfo").addEventListener("click", openModels);
   $("modelsClose").addEventListener("click", () => $("modelsDialog").close());
   $("useGpu").addEventListener("change", (e) => { S.settings.useGpu = e.target.checked; S.lastOnGpu = null; saveSettings(); renderEngineInfo(); });
@@ -1000,6 +1074,7 @@ async function start() {
   if (!hasModel()) openModels();
   // Только после подписки на события: иначе файл, открытый при запуске, мог пропасть.
   await Promise.all(S.listening);
+  refreshVoice();
   const pending = await invoke("ui_ready");
   if (hasModel() && pending.length) transcribe(pending);
   if (S.settings.diarize && !S.diarizeReady && !S.downloading.has("diarization")) startDiarizeDownload();

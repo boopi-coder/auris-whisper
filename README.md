@@ -33,6 +33,13 @@ No accounts, no uploads. Everything runs on your own computer.
   files at once, they run one after another.
 - **Voice messages work.** Ogg Opus from messengers opens fine; the format is
   detected from the file contents, not the extension.
+- **Voice input into any app.** Press the hotkey (⌥Space on a Mac,
+  Ctrl+Alt+Space on Windows and Linux by default) and speak — the text appears
+  where the cursor is: a messenger, email, a document. Press it again to finish.
+  Phrases are pasted as you go, after each pause, and a small indicator in the
+  corner of the screen shows what is being recognised. The app lives in the tray
+  and can start with the system. macOS needs the Accessibility permission (the
+  app asks for it); on Linux pasting works under X11.
 - **Dictate** (⌘R / Ctrl+R) with a live level meter, then *Stop and transcribe*.
   The recording is kept as `.wav` next to its transcript. Pick the microphone
   under the buttons; if it stays silent, the app says so right away and opens the

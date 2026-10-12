@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Auris Whisper</title>
+  <style>
+    /* Индикатор голосового ввода: окно прозрачное, видна только «капсула». */
+    :root {
+      --pill: rgba(24, 24, 28, 0.88);
+      --line: rgba(255, 255, 255, 0.10);
+      --text: #f4f4f6;
+      --muted: rgba(244, 244, 246, 0.62);
+      --rec: #ff4d4f;
+      --accent: #8b8cf7;
+    }
+    html, body {
+      margin: 0; height: 100%; background: transparent; overflow: hidden;
+      font: 13px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-user-select: none; user-select: none; cursor: default;
+    }
+    .wrap { position: fixed; inset: 0; display: flex; align-items: flex-end; justify-content: flex-end; padding: 6px; box-sizing: border-box; }
+    .pill {
+      display: flex; align-items: center; gap: 12px;
+      max-width: 100%; min-width: 0; box-sizing: border-box;
+      padding: 10px 16px 10px 12px; border-radius: 18px;
+      background: var(--pill); color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+      -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+      opacity: 0; transform: translateY(8px) scale(0.98);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .pill.on { opacity: 1; transform: none; }
+    .mic {
+      flex: 0 0 34px; height: 34px; border-radius: 50%;
+      display: grid; place-items: center; position: relative;
+      background: rgba(255, 77, 79, 0.16);
+    }
+    .mic svg { width: 17px; height: 17px; stroke: var(--rec); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .mic::after {
+      content: ""; position: absolute; inset: -3px; border-radius: 50%;
+      border: 2px solid var(--rec); opacity: 0; transform: scale(calc(0.85 + var(--lvl, 0) * 0.4));
+      transition: transform .09s linear, opacity .09s linear;
+    }
+    .pill.listening .mic::after { opacity: calc(0.25 + var(--lvl, 0) * 0.75); }
+    .pill.loading .mic, .pill.finishing .mic { background: rgba(139, 140, 247, 0.18); }
+    .pill.loading .mic svg, .pill.finishing .mic svg { stroke: var(--accent); }
+    .pill.loading .mic::after, .pill.finishing .mic::after {
+      border-color: var(--accent) transparent transparent transparent; opacity: 1;
+      animation: spin .9s linear infinite; transform: none;
+    }
+    .pill.message .mic { background: rgba(255, 196, 0, 0.16); }
+    .pill.message .mic svg { stroke: #ffc400; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .body { min-width: 0; flex: 1; }
+    .head { display: flex; align-items: baseline; gap: 8px; color: var(--muted); font-size: 11.5px; letter-spacing: .01em; }
+    .head b { color: var(--text); font-weight: 600; font-size: 12.5px; }
+    .time { font-variant-numeric: tabular-nums; }
+    .text {
+      margin-top: 2px; white-space: nowrap; overflow: hidden;
+    }
+    .text:empty { display: none; }
+    .pill.message .text { white-space: normal; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="pill" id="pill">
+      <div class="mic" id="mic">
+        <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>
+      </div>
+      <div class="body">
+        <div class="head"><b id="title"></b><span class="time" id="time"></span></div>
+        <div class="text" id="text"></div>
+      </div>
+    </div>
+  </div>
+  <script src="overlay.js"></script>
+</body>
+</html>

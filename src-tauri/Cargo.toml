@@ -1,6 +1,6 @@
 [package]
 name = "auris-whisper"
-version = "2.2.3"
+version = "2.3.0"
 description = "Offline speech-to-text: drop a file or dictate, get clean text"
 authors = ["boopi.site"]
 license = "MIT"
@@ -21,12 +21,17 @@ path = "src/main.rs"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["tray-icon", "image-png", "macos-private-api"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-clipboard-manager = "2"
 tauri-plugin-single-instance = "2"
 tauri-plugin-updater = "2"
+# Голосовой ввод: горячая клавиша в любой программе, автозапуск, вставка текста
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-autostart = "2"
+enigo = "0.6"
+arboard = "3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

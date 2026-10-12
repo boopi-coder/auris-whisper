@@ -197,6 +197,14 @@ jobs:
              && PYTHONIOENCODING=utf-8 $PY scripts/diarize-score.py tests/audio/dialog_2speakers.truth.json diar.json --max-err 5 --speakers 2 | tee -a ci.log | sed "s/^/::notice title=diarize (${{ matrix.slug }})::/"; then :
           else failed="$failed diarize-quality"; echo "::error::diarize quality"; cat diar.json | tee -a ci.log; fi
           echo "::endgroup::"
+          # Голосовой ввод: потоковая нарезка на фразы и расшифровка «в реальном времени».
+          (cd src-tauri && cargo build --release --example dictation --target ${{ matrix.target }} 2>&1 | tail -2)
+          DICT=${CARGO_TARGET_DIR:-src-tauri/target}/${{ matrix.target }}/release/examples/dictation
+          echo "::group::dictation"
+          if "$DICT" test-ru-models/gigaam $A 2>&1 | tee out.txt | tee -a ci.log && grep -q "роверк" out.txt; then
+            grep -E "вставка|хвост" out.txt | head -3 | sed "s/^/::notice title=dictation (${{ matrix.slug }})::/" || true
+          else failed="$failed dictation"; echo "::error::dictation"; fi
+          echo "::endgroup::"
           run diarize-whisper test-model/ggml-tiny.bin $A ru --diarize $D 2
           run t-one test-ru-models/t-one $A
           run gigaam test-ru-models/gigaam $A

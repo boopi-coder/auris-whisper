@@ -105,3 +105,38 @@ pub fn speech_spans(
     parts.sort_by_key(|p| p.0);
     Some(parts.into_iter().flat_map(|p| p.1).collect())
 }
+
+/// Детектор, который живёт всю сессию голосового ввода: его спрашивают
+/// несколько раз в секунду про последние секунды записи.
+pub struct Detector {
+    ctx: WhisperVadContext,
+    params: WhisperVadParams,
+}
+
+impl Detector {
+    pub fn new(model: &Path) -> Option<Self> {
+        let mut cp = WhisperVadContextParams::new();
+        cp.set_n_threads(1);
+        cp.set_use_gpu(false);
+        let ctx = WhisperVadContext::new(model.to_str()?, cp).ok()?;
+        let mut params = WhisperVadParams::new();
+        params.set_threshold(0.5);
+        params.set_min_speech_duration(150);
+        params.set_min_silence_duration(150);
+        params.set_max_speech_duration(f32::MAX);
+        params.set_speech_pad(30);
+        params.set_samples_overlap(0.0);
+        Some(Self { ctx, params })
+    }
+
+    /// Отрезки речи в `samples`, секунды от их начала.
+    pub fn spans(&mut self, samples: &[f32]) -> Vec<(f64, f64)> {
+        if samples.len() < SAMPLE_RATE as usize / 4 {
+            return Vec::new();
+        }
+        match self.ctx.segments_from_samples(self.params, samples) {
+            Ok(segs) => segs.map(|s| (s.start as f64 / 100.0, s.end as f64 / 100.0)).collect(),
+            Err(_) => Vec::new(),
+        }
+    }
+}
